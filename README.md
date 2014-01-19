@@ -64,14 +64,14 @@ When the build script begins, it sets the `DOCKER_HOST` environment variable to 
 
 ## Future work
 
-- [ ] Tighten up SSH configs for docker provisioner
-- [ ] Cleanup/delete Docker VM after building
-- [ ] Combine docker image with Dockerfile for startup metadata
-- [ ] Auto-upload images to server (and Docker container to public index)
-- [ ] Figure out a less hacky way to use a VM with docker. (see [dvm](https://github.com/fnichol/dvm) project)
-- [ ] Fork Packer's docker provisioner and make it not suck so badly
-- [ ] Figure out basic `Vagrantfile` for the various boxes
-- [ ] Add Vagrant's public key for easier ssh access. Something like this...
+- Tighten up SSH configs for docker provisioner
+- Cleanup/delete Docker VM after building
+- Combine docker image with Dockerfile for startup metadata
+- Auto-upload images to server (and Docker container to public index)
+- Figure out a less hacky way to use a VM with docker. (see [dvm](https://github.com/fnichol/dvm) project)
+- Fork Packer's docker provisioner and make it not suck so badly
+- Figure out basic `Vagrantfile` for the various boxes
+- Add Vagrant's public key for easier ssh access. Something like this...
 
 ```
 {
