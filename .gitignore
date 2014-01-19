@@ -1,0 +1,8 @@
+.DS_Store
+.vagrant
+output-*
+packer_cache
+inboxapp_*
+
+ssh/id_rsa
+ssh/id_rsa.pub
