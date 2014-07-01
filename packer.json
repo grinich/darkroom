@@ -1,187 +1,48 @@
 {
-  "variables": {
-    "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
-    "aws_secret_key": "{{env `AWS_SECRET_KEY`}}",
-    "do_api_key": "{{env `DIGITALOCEAN_API_KEY`}}",
-    "do_client_id": "{{env `DIGITALOCEAN_CLIENT_ID`}}"
-  },
   "builders": [
-  {
-    "type": "amazon-ebs",
-    "access_key": "{{user `aws_access_key`}}",
-    "secret_key": "{{user `aws_secret_key`}}",
-    "region": "us-west-2",
-    "source_ami": "ami-6aad335a",
-    "instance_type": "m1.small",
-    "ssh_username": "ubuntu",
-    "ami_name": "inboxapp-server {{timestamp}}"
-  },
-  {
-    "type": "digitalocean",
-    "snapshot_name": "inboxapp-server {{timestamp}}",
-    "api_key": "{{user `do_api_key`}}",
-    "client_id": "{{user `do_client_id`}}"
-  },
-  {
-    "type": "vmware-iso",
-    "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.3-server-amd64.iso",
-    "iso_checksum": "61d5e67c70d97b33c13537461a0b153b41304ef412bb0e9d813bb157068c3c65",
-    "iso_checksum_type": "sha256",
-    "boot_wait": "5s",
-    "http_directory": ".",
-    "boot_command": [
-      "<esc><esc><enter><wait>",
-      "/install/vmlinuz noapic preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
-      "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-      "hostname={{ .Name }} ",
-      "fb=false debconf/frontend=noninteractive ",
-      "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-      "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-      "initrd=/install/initrd.gz -- ",
-      "<enter>"
-    ],
-    "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
-    "ssh_wait_timeout": "30m",
-    "ssh_username": "vagrant",
-    "ssh_password": "vagrant"
-  },
-  {
-    "type": "virtualbox-iso",
-    "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.3-server-amd64.iso",
-    "iso_checksum": "61d5e67c70d97b33c13537461a0b153b41304ef412bb0e9d813bb157068c3c65",
-    "iso_checksum_type": "sha256",
-    "guest_os_type": "Ubuntu_64",
-    "boot_wait": "5s",
-    "http_directory": ".",
-    "boot_command": [
-      "<esc><esc><enter><wait>",
-      "/install/vmlinuz noapic ",
-      "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
-      "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-      "hostname={{ .Name }} ",
-      "fb=false debconf/frontend=noninteractive ",
-      "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-      "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-      "initrd=/install/initrd.gz -- ",
-      "<enter>"
-    ],
-    "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
-    "ssh_wait_timeout": "30m",
-    "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
-    "virtualbox_version_file": ".vbox_version",
-    "ssh_username": "vagrant",
-    "ssh_password": "vagrant"
-  },
-  {
-  "type": "docker",
-  "image": "ubuntu:12.04",
-  "export_path": "inboxapp_docker.box.tar"
-  }],
+      {
+        "type": "virtualbox-iso",
+        "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.4-server-amd64.iso",
+        "iso_checksum": "3aeb42816253355394897ae80d99a9ba56217c0e98e05294b51f0f5b13bceb54",
+        "iso_checksum_type": "sha256",
+        "guest_os_type": "Ubuntu_64",
+        "boot_wait": "5s",
+        "http_directory": ".",
+        "boot_command": [
+          "<esc><esc><enter><wait>",
+          "/install/vmlinuz noapic ",
+          "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+          "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+          "hostname={{ .Name }} ",
+          "fb=false debconf/frontend=noninteractive ",
+          "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+          "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+          "initrd=/install/initrd.gz -- ",
+          "<enter>"
+        ],
+        "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
+        "ssh_wait_timeout": "30m",
+        "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+        "virtualbox_version_file": ".vbox_version",
+        "ssh_username": "vagrant"
+      }
+  ],
   "provisioners": [
-
   {
     "type": "shell",
-    "inline": [
-      "sleep 30",
-      "mkdir -p ~/.ssh"
-    ]
-  },
-
-  {
-    "type": "file",
-    "source": "./ssh/config",
-    "destination": "~/.ssh/config"
-  },
-  {
-    "type": "file",
-    "source": "./ssh/id_rsa",
-    "destination": "~/.ssh/id_rsa"
-  },
-  {
-    "type": "file",
-    "source": "./ssh/id_rsa.pub",
-    "destination": "~/.ssh/id_rsa.pub"
-  },
-  {
-    "type": "file",
-    "source": "./ssh/known_hosts",
-    "destination": "~/.ssh/known_hosts"
-  },
-
-
-  {
-    "type": "shell",
-    "only": ["amazon-ebs", "digitalocean"],
-    "inline": [
-      "sudo apt-get update -y ",
-      "chmod 600 ~/.ssh/id_rsa",
-      "chmod 600 ~/.ssh/id_rsa.pub",
-      "chmod 600 ~/.ssh/known_hosts",
-      "ssh-add",
-      "ssh -vT git@github.com",
-      "sudo apt-get install git -y",
-      "git clone git@github.com:inboxapp/inbox.git ~/inbox",
-      "cd ~/inbox && sudo -E /bin/sh ./setup.sh"
-    ]
-  },
-
-
-  {
-    "type": "shell",
-    "only": ["virtualbox-iso", "vmware-iso"],
+    "only": ["virtualbox-iso"],
     "inline": [
       "echo 'vagrant' | sudo -E -S apt-get update -y ",
-      "chmod 600 ~/.ssh/id_rsa",
-      "chmod 600 ~/.ssh/id_rsa.pub",
-      "chmod 600 ~/.ssh/known_hosts",
       "echo 'vagrant' | sudo -E -S ssh-add",
-      "ssh -vT git@github.com",
       "echo 'vagrant' | sudo -E -S apt-get install git -y",
-      "git clone git@github.com:inboxapp/inbox.git ~/inbox",
-      "cd ~/inbox && echo 'vagrant' | sudo -E -S /bin/sh  ./setup.sh"
-    ]
-  },
-
-  {
-    "type": "shell",
-    "only": ["docker"],
-    "inline": [
-      "set -e",
-      "export DEBIAN_FRONTEND=noninteractive",
-
-      "apt-get -y install python-software-properties",
-      "add-apt-repository 'deb http://archive.ubuntu.com/ubuntu precise universe'",
-      "apt-get update -y ",
-
-      "chmod 600 ~/.ssh/id_rsa",
-      "chmod 600 ~/.ssh/id_rsa.pub",
-      "chmod 600 ~/.ssh/known_hosts",
-
-      "apt-get install -y openssh-client openssh-server",
-      "apt-get install -y git",
-      "apt-get install -y dialog",
-
-      "sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config",
-      "sed -ri 's/#UsePAM no/UsePAM no/g' /etc/ssh/sshd_config",
-      "echo '\nStrictHostKeyChecking no\n' >> /etc/ssh/ssh_config",
-
-      "eval `ssh-agent -s`",
-      "ssh-add ~/.ssh/id_rsa",
-
-      "echo 'Ready to clone from git ...'",
-      "git clone git@github.com:inboxapp/inbox.git ~/inbox",
-
-      "apt-get update -y",
-      "sleep 10",
-      "cd ~/inbox && /bin/bash ./setup.sh"
+      "git clone https://github.com/inboxapp/inbox.git ./inbox",
+      "cd ./inbox && echo 'vagrant' | sudo -E -S /bin/sh  ./setup.sh"
     ]
   }
-
   ],
 
   "post-processors": [{
       "type": "vagrant",
-      "except": ["docker"],
       "output": "inboxapp_{{.Provider}}.box",
       "keep_input_artifact": true
   }]
